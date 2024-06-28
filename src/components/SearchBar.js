@@ -1,51 +1,40 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import "./SearchBar.css";
+import "../styles/SearchBar.css";
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import { textStyles } from '../styles/textStyles';
 
-export default function SearchBar({ setResponse, setLoading, setSearchResults, setShowReview, getResponse }) {
+export default function SearchBar({ country, setResponse, setLoading, setSearchResults, setShowReview, getResponse, setSearched, showToast, status }) {
   const [ query, setQuery ] = useState("");
   const [ isButtonDisabled, setIsButtonDisabled ] = useState(true);
 
-  // async function getGeoInfo() {
-  //   try {
-  //     let response = await axios.get('https://ipapi.co/json/')
-  //     let country_code = response.data.country_code;
-  //     return country_code;
-  //   } catch (err) {
-  //     console.error(err);
-  //   }    
-  // };
-
   async function fetchUserData() {
     try {
+      setSearched(true);
       setShowReview(false);
       setResponse([]);
       setLoading(true);
       setQuery("");
       setIsButtonDisabled(true);
-      // let country_code = await getGeoInfo();
 
-      if (query.includes("https://store.steampowered.com/app/")) {
+      if (query.includes("https://store.steampowered.com/app/") && query.split("/")[4]) {
         const appId = query.split("/")[4];
-
-        // Check if appId exists on Steam
-
         getResponse(appId);
-        // const { data } = await axios.get(`${process.env.REACT_APP_URL}/api/reviews/${appId}`);
+      } else if (!query.includes("http")) {
+        const { data } = await axios.get(`${process.env.REACT_APP_URL}/api/store/${query}?country=${country}`);
+        
+        if (data.length !== "404") {
+          setSearchResults(data);
+        }
       } else {
-        const { data } = await axios.get(`${process.env.REACT_APP_URL}/api/store/${query}`);
-        setSearchResults(data);
+        showToast(5000, "Invalid Steam URL.");
       }
-      // console.log(data);
-      // formatResult(data);
       setLoading(false);
     } catch (err) {
-      setResponse("Unable to fetch data from the server. Please try again later.");
-      console.error(err);
       setLoading(false);
+      showToast(3000, "Unable to search for Steam game. Please try again later.");
     }
   };
 
@@ -69,22 +58,21 @@ export default function SearchBar({ setResponse, setLoading, setSearchResults, s
   return (
     <div className="input-wrapper">
       <TextField
+        disabled={!status}
         className="form-control"
         variant="outlined"
         InputProps={{
           background: 'white',
         }}
-        placeholder="Search by game or paste the Steam URL"
+        placeholder={status ? "Search by game or paste the Steam URL" : ""}
         sx={{
           '& .MuiInputBase-input': {
-            color: 'white',
             padding: '15px',
             marginLeft: '10px',
-            fontFamily: 'Inter, sans-serif',
+            ...textStyles.text,
           },
           '& .MuiInputBase-input::placeholder': {
-            color: 'white',
-            fontFamily: 'Inter, sans-serif',
+            ...textStyles.text,
           },
           '& .MuiOutlinedInput-root': {
             background: 'transparent',
@@ -116,7 +104,7 @@ export default function SearchBar({ setResponse, setLoading, setSearchResults, s
             marginRight: '10px',
             backgroundColor: 'white',
             '&:hover': {
-              backgroundColor: 'lightgray', // Background color on hover
+              backgroundColor: 'lightgray',
             },
             "&:disabled": {
               backgroundColor: 'grey'
@@ -124,17 +112,6 @@ export default function SearchBar({ setResponse, setLoading, setSearchResults, s
           }}>
           <ArrowUpwardIcon />
         </IconButton>
-        {/* <button onClick={fetchUserData}>Send</button> */}
-      {/* <TextField className="form-control" variant="filled" label="Search for a Steam Game or paste in the Steam Game URL (https://store.steampowered.com/app/0000/steam_game/)" /> */}
-      {/* <FaSearch id="search-icon"/> */}
-      {/* <input
-          type="text"
-          onChange={(e) => setQuery(e.target.value)}
-          className="form-control"
-          placeholder="Search for Games using the Steam App ID..."
-          onKeyDown={handleKeyDown}
-      /> */}
-      {/* <button onClick={fetchUserData}>Send</button> */}
     </div>
   );
 };

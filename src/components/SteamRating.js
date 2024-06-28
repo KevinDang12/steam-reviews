@@ -17,7 +17,7 @@ export default function SteamRating({ value }) {
           value={value / 2}
           readOnly
           precision={0.5}
-          emptyIcon={<StarIcon style={{ opacity: 1, color: '#FFF5', }} fontSize="inherit" />}
+          emptyIcon={<StarIcon sx={{ opacity: 1, color: '#FFF5', }} fontSize="inherit" />}
           sx={{
             '& .MuiRating-iconFilled': {
               color: 'lightBlue',

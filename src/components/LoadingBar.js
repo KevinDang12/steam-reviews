@@ -1,6 +1,6 @@
 import React from 'react';
 import { ThreeDots } from 'react-loader-spinner';
-import './LoadingBar.css';
+import '../styles/LoadingBar.css';
 
 /**
  * The Loading Page Component

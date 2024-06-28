@@ -6,27 +6,11 @@ const cors = require('cors');
 const path = require('path');
 const axios = require('axios');
 const { OpenAI } = require("openai");
+const { db } =  require('./firebase/firebase');
 
 const _dirname = path.dirname('');
 const buildPath = path.join(_dirname, '../build');
 const BASE_URL = 'http://localhost:3000';
-
-app.use(express.static(buildPath));
-
-/**
- * Display the Front-end when the users are
- * on the following pathname
- */
-app.get(/^(?!\/(api|auth|logout)).+/, (req, res) => {
-  res.sendFile(
-      path.join(__dirname, '../build/index.html'),
-      function(err) {
-        if (err) {
-          res.status(500).send(err);
-        }
-      },
-  );
-});
 
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
@@ -53,7 +37,73 @@ const openai = new OpenAI({
   apiKey: process.env.REACT_APP_API_KEY,
 });
 
-async function createChatCompletion (input) {
+app.post('/db/reviews', async (req, res) => {
+  try {
+    const review = req.body.review;
+    const id = req.body.id;
+
+    const reviewDocRef = db.collection('reviews').doc(id.toString());
+    let date = new Date();
+    date = Math.floor(date.getTime() / 1000);
+
+    await reviewDocRef.set({
+      review: review,
+      date: date,
+    });
+
+    res.send("Review added to database");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error adding data');
+  }
+});
+
+app.get('/db/reviews', async (req, res) => {
+  try {
+    const snapshot = await db.collection('reviews').get();
+    const data = snapshot.docs.map(doc => doc.data());
+    res.send(data);
+  } catch (error) {
+    console.error('Error getting documents: ', error);
+    res.status(500).send('Error getting data');
+  }
+});
+
+app.get('/db/reviews/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const reviewDocRef = db.collection('reviews').doc(id.toString());
+    const doc = await reviewDocRef.get();
+
+    if (!doc.exists) {
+      res.send("No Document");
+    } else {
+      res.send(doc.data());
+    }
+  } catch (error) {
+    console.error('Error getting documents: ', error);
+    res.status(500).send('Error getting data');
+  }
+});
+
+app.use(express.static(buildPath));
+
+/**
+ * Display the Front-end when the users are
+ * on the following pathname
+ */
+app.get(/^(?!\/(api|auth|logout)).+/, (req, res) => {
+  res.sendFile(
+      path.join(__dirname, '../build/index.html'),
+      function(err) {
+        if (err) {
+          res.status(500).send(err);
+        }
+      },
+  );
+});
+
+async function createChatCompletion(input) {
   let reply = "";
 
   await openai.chat.completions.create({
@@ -64,7 +114,7 @@ async function createChatCompletion (input) {
         "content": [
           {
             "type": "text",
-            "text": "You are a Steam game review assistant for a website that allows users to search for their favorite games from Steam. Your job is to summarize the recent users' reviews. Please summarize the positives and the negatives of the game. Please go into as much detail as possible and remain unbiased. The review summary must be a couple of paragraphs long. Do not provide the reviews in bullet points or quotation marks."
+            "text": "You are a Steam game review assistant for a website that allows users to search for their favourite games from Steam. Your job is to summarize the recent users' reviews. Please summarize the positives and the negatives of the game. Please go into as much detail as possible and remain unbiased. The review summary must be provided in paragraphs and as long as you can. Write as much as you possibly can for the review summary and go into as much detail as possible. Do not list the reviews in bullet points or quotation marks."
           }
         ]
       },
@@ -78,9 +128,9 @@ async function createChatCompletion (input) {
         ]
       },
     ],
-      temperature: 0.6,
-      max_tokens: 400,
-      top_p: 0.5,
+      temperature: 0.8,
+      max_tokens: 500,
+      top_p: 0.8,
       frequency_penalty: 0,
       presence_penalty: 0,
     }).then(response => {
@@ -124,7 +174,7 @@ async function createText(appId, nextReview) {
 
     let { reviews, cursor } = response.data
 
-    nextCursor = cursor
+    nextCursor = cursor;
 
     if (reviews.length === 0) {
       break;
@@ -142,13 +192,11 @@ async function createText(appId, nextReview) {
 
       } else if (reviewText.split(' ').length + result.split(' ').length >= minTextLength && reviewText.split(' ').length + result.split(' ').length < maxTextLength) {
         reviewText += result + "\n"
-        console.log(1);
         return reviewText.trim()
 
       } else {
         if (result.split(' ').length <= 200) {
           reviewText += result + "\n"
-          console.log(2);
           return reviewText.trim()
 
         } else {
@@ -159,11 +207,8 @@ async function createText(appId, nextReview) {
   }
 
   if (reviewText.length > 0) {
-    console.log(3);
-    console.log(reviewText.split(' ').length);
     return reviewText.trim()
   } else {
-    console.log(4);
     return "NO RESULTS";
   }
 }
@@ -184,17 +229,42 @@ async function retrieveReviews(appId, cursor) {
   }
 }
 
+function formatResult(text) {
+  let paragraphs = text.split('\n');
+    for (let i = 0; i < paragraphs.length; i++) {
+      paragraphs[i].replace(/(\r\n|\n|\r)/gm, "");
+    }
+    return paragraphs;
+}
+
 app.get('/api/reviews/:appId', async (req, res) => {
   try {
     const { appId } = req.params;
 
     const value = await createText(appId, "*");
-    if (value === "NO RESULTS") {
-      res.send(value);
+    const { data } = await axios.get(`${process.env.REACT_APP_URL}/db/reviews/${appId}`);
+
+    let today = new Date();
+    today = Math.floor(today.getTime() / 1000);
+    const date = data.date + (30 * 24 * 60 * 60);
+
+    if (data === "No Document" || today >= date) {
+      if (value === "NO RESULTS") {
+        const paragraphs = formatResult(value);
+        res.send(paragraphs);
+      } else {
+        const response = await createChatCompletion(value);
+        const paragraphs = formatResult(response);
+
+        res.send(paragraphs);
+
+        await axios.post(`${process.env.REACT_APP_URL}/db/reviews`, {
+          id: appId,
+          review: paragraphs,
+        });
+      }
     } else {
-      createChatCompletion(value).then((response) => {
-        res.send(response);
-      });
+      res.send(data.review);
     }
   } catch (error) {
     console.error('Failed: ' + error);
@@ -204,10 +274,11 @@ app.get('/api/reviews/:appId', async (req, res) => {
 app.get('/api/store/:game', async (req, res) => {
   try {
     const { game } = req.params;
+    const { country } = req.query;
 
     const { data } = await axios.get(`https://store.steampowered.com/api/storesearch/?term=${game}`, {
       params: {
-        cc: "ca",
+        cc: country,
       },
     });
 
@@ -221,40 +292,66 @@ app.get('/api/store/:game', async (req, res) => {
 
     res.send(result);
   } catch (error) {
+    res.send("404");
     console.error(error);
     console.error('Failed to fetch data from Steam Reviews');
   }
 });
 
-app.get('/api/gamedetails/:appid', async (req, res) => {
+app.get('/api/countries', async (req, res) => {
+  const { data } = await axios.get('https://steamcommunity.com/actions/QueryLocations/');
+
+  let countries = data.map(country => ({
+    name: country.countryname,
+    code: country.countrycode,
+  }));
+
+  res.send(countries);
+});
+
+app.get('/api/gamedetails/:appId', async (req, res) => {
   try {
-    const { appid } = req.params;
+    const { appId } = req.params;
+    const { country } = req.query;
 
-    const response = await axios.get(`https://store.steampowered.com/api/appdetails?appids=${appid}&cc=ca`);
+    const response = await axios.get(`https://store.steampowered.com/api/appdetails?appids=${appId}&cc=${country}`);
 
-    const data = response.data[appid].data;
+    const data = response.data[appId].data;
 
-    let reviews = await axios.get(`https://store.steampowered.com/appreviews/${appid}`, {
+    if (data.success === 'false') {
+      res.send("404");
+      return;
+    }
+
+    let reviews = await axios.get(`https://store.steampowered.com/appreviews/${appId}`, {
       params: {
         json: 1,
         filter: "recent",
       },
     });
 
+    let genres = [];
+
+    if (data?.genres !== undefined) {
+      genres = data.genres.map(genre => genre.description);
+    }
+
     let result = {
       name: data.name,
       image: data.header_image,
+      type: data.type,
+      full_game: data?.fullgame ?? "",
       review_score: reviews.data.query_summary.review_score,
       review_description: reviews.data.query_summary.review_score_desc,
       price: data.price_overview?.final_formatted ?? "No price details available",
       release_date: data.release_date?.date ?? "No release date available",
       description: data.short_description,
-      genres: data?.genres.map(genre => genre.description) ?? [],
+      genres: genres,
     };
 
     res.send(result);
   } catch (error) {
-    res.send("No results found");
+    res.send("404");
     console.error(error);
     console.error('Failed to fetch data from Steam Reviews');
   }

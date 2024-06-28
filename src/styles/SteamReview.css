@@ -1,0 +1,126 @@
+:root {
+  --text-color: white;
+  --text-font: Inter, sans-serif;
+}
+
+.clickable-text {
+  color: var(--text-color);
+  cursor: pointer;
+  &:hover {
+    color: lightgrey;
+  }
+}
+
+.steam-name {
+  margin: 10px;
+  font-weight: normal;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.steam-image {
+  margin: 10px;
+  border-radius: 25px;
+  background-color: #5C5C5C;
+}
+
+.steam-dlc {
+  margin: 5px;
+  font-weight: normal;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.dlc-description {
+  margin: 5px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.section-header {
+  margin: 10px 15px 5px 15px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.genre {
+  margin: 10px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.review-description {
+  margin: 10px 15px 15px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.score {
+  margin: 10px 0;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.overall-review {
+  margin: 10px 25px 10px auto;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.price-header {
+  margin: 10px 15px 0;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.release-header {
+  margin: 10px 25px 0 auto;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.price {
+  margin: 0 15px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.release-date {
+  margin: 0 25px 0 auto;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.loading-container {
+  padding: 50px;
+}
+
+.loading-bar {
+  display: flex;
+  align-items: center;
+}
+
+.review-container {
+  display: flex;
+  align-items: center;
+}
+
+.review-summary {
+  margin: 0 auto 10px;
+  font-size: 18px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.summary {
+  margin: 5px 15px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.disclaimer {
+  margin: 10px 15px;
+  font-size: 10px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
