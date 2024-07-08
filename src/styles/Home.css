@@ -2,7 +2,6 @@
   background-color: #212121;
   overflow: auto;
   height: 100vh;
-  width: 100vw;
 }
 
 .loading-bar-container {
@@ -12,40 +11,42 @@
 }
 
 .container {
+  background-color: #212121;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-top: 2vh;
 }
 
 .left-component {
-  flex: 2;
-  padding: 0 30px;
+  flex: 1;
   display: flex;
   justify-content: right;
   align-items: center;
-  min-height: 100vh;
-  min-width: 100px;
 }
 
 .right-component {
-  flex: 2;
-  padding: 0 30px;
+  flex: 1;
   display: flex;
   justify-content: left;
   align-items: center;
-  min-height: 100vh;
-  min-width: 100px;
 }
 
 .search-bar-container {
-  flex: 3;
+  flex: 2;
   padding: 5px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 100px;
-  height: 100vh;
+  height: 80vh;
+}
+
+.search-bar-container-mobile {
+  width: 60%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 200px;
+  height: 80vh;
 }
 
 .results-container {
@@ -56,6 +57,7 @@
   width: 95%;
   min-width: 200px;
   text-align: center;
+  height: 80vh;
 }
 
 .search-bar {
@@ -65,9 +67,60 @@
 }
 
 .menu-icons {
+  display: flex;
+  align-items: center;
+}
+
+.menu-icons-mobile {
+  margin-left: 10px;
+}
+
+.mobile-button {
+  background: none;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #00000000;
+  color: #fff;
+  transition: background-color 0.3s ease;
+}
+
+.mobile-button:focus {
+  background: none;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #00000000;
+  color: #fff;
+  transition: background-color 0.3s ease;
+}
+
+.menu-items {
+  display: none;
   position: absolute;
-  right: 3vh;
-  top: 2vh;
+  top: 100%;
+  left: 0;
+  background-color: rgb(51, 51, 51);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  width: 100%;
+  min-width: 200px;
+  text-align: left;
+}
+
+.menu-items.show {
+  display: block;
 }
 
 .error-container {

@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Steam Review Summarizer",
+  "name": "A web app that summarizes Steam reviews using OpenAI's GPT-3.5",
   "icons": [
     {
       "src": "favicon.ico",

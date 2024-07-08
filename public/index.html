@@ -5,9 +5,12 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
+    <title>Steam Review Summarizer</title>
     <meta
       name="description"
-      content="A Steam review summarizer for Steam games using OpenAI's GPT-3.5."
+      content="A Steam review summarizer for Steam games using OpenAI's GPT-3.5 turbo model.
+      The web app uses the Steam API to search for a list of games and fetch the reviews.
+      The recent reviews are fed to the OpenAI GPT-3.5-turbo model to process and generate a summary of the reviews."
     />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
@@ -24,21 +27,30 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>Steam Review Summarizer</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <link rel="canonical" href="https://steamreviewsummarizer.com" />
+    <meta name="robots" content="index, follow">
+    <meta name="keywords" content="steam review summarizer, steam reviews, steam review, steam review summary, steam summarizer, steamreviewsummarizer, search for a steam game to get the review summary, steam ai summarizer, steam ai review summary, steam review summarizer free">
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "WebPage",
+        "name": "Steam Review Summarizer",
+        "description": "A Steam review summarizer for Steam games using OpenAI's GPT-3.5 turbo model. The web app uses the Steam API to search for a list of games and fetch the reviews. The recent reviews are fed to the OpenAI GPT-3.5-turbo model to process and generate a summary of the reviews.",
+        "url": "https://steamreviewsummarizer.com"
+      }
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7533412786298724"
+     crossorigin="anonymous"></script>
+
+     <meta property="og:type" content="website">
+     <meta property="og:title" content="Steam Review Summarizer">
+     <meta property="og:description" content="A Steam review summarizer for Steam games using OpenAI's GPT-3.5 turbo model.
+     The web app uses the Steam API to search for a list of games and fetch the reviews.
+     The recent reviews are fed to the OpenAI GPT-3.5-turbo model to process and generate a summary of the reviews.">
+     <meta property="og:url" content="https://steamreviewsummarizer.com">
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <!-- <noscript>You need to enable JavaScript to run this app.</noscript> -->
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
   </body>
 </html>

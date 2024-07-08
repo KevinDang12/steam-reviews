@@ -14,6 +14,9 @@ import { textStyles } from '../styles/textStyles';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
       padding: '16px 48px 48px 48px',
+      '@media only screen and (max-width: 350px)': {
+        padding: '16px 24px'
+      },
     },
     '& .MuiDialogActions-root': {
       padding: theme.spacing(1),
@@ -55,7 +58,10 @@ export default function InfoDialog({ setOpen, open }) {
             p: 2,
             backgroundColor: '#2f2f2f',
             ...textStyles.text,
-            padding: '48px 48px 16px 48px'
+            padding: '48px 48px 16px 48px',
+            '@media only screen and (max-width: 350px)': {
+              padding: '16px 24px'
+            },
           }}
         >
           <div className='title-container'>
@@ -80,15 +86,15 @@ export default function InfoDialog({ setOpen, open }) {
         </IconButton>
         <DialogContent dividers sx={{ backgroundColor: '#2f2f2f', ...textStyles.text, }}>
           <Typography gutterBottom>
-            It uses the Steam API to search for the list of games, and fetch the
-            description and recent reviews. The recent reviews are fed to OpenAI
-            using the GPT-3.5-turbo model to process and generate a summary of the reviews.
+            This web app uses the Steam API to search for the list of games,
+            and fetch the description and recent reviews. The recent reviews 
+            are fed to the OpenAI GPT-3.5-turbo model to process and generate a summary of the reviews.
           </Typography>
           <Typography gutterBottom>
             Please note that AI is not perfect at summarizing reviews, for example there are risks of AI <u className='link' onClick={() => openInNewTab("https://www.ibm.com/topics/ai-hallucinations")}>hallucinations</u>.
           </Typography>
           <Typography gutterBottom>
-            If you have any comments or suggestions, please email me at <u className='link' onClick={copyEmail}>kevindouglasdang@gmail.com</u>
+            If you have any comments or suggestions, or have discovered a bug, please email me at <u className='link' onClick={copyEmail}>kevindouglasdang@gmail.com</u>
           </Typography>
         </DialogContent>
       </BootstrapDialog>

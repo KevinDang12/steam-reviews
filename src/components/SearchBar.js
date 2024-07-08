@@ -1,47 +1,39 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import "../styles/SearchBar.css";
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import { textStyles } from '../styles/textStyles';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-export default function SearchBar({ country, setResponse, setLoading, setSearchResults, setShowReview, getResponse, setSearched, showToast, status }) {
+export default function SearchBar({ status }) {
   const [ query, setQuery ] = useState("");
   const [ isButtonDisabled, setIsButtonDisabled ] = useState(true);
 
-  async function fetchUserData() {
-    try {
-      setSearched(true);
-      setShowReview(false);
-      setResponse([]);
-      setLoading(true);
-      setQuery("");
-      setIsButtonDisabled(true);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    setQuery("");
+  }, [location.search]);
+
+  const fetchUserData = async (query) => {
 
       if (query.includes("https://store.steampowered.com/app/") && query.split("/")[4]) {
         const appId = query.split("/")[4];
-        getResponse(appId);
-      } else if (!query.includes("http")) {
-        const { data } = await axios.get(`${process.env.REACT_APP_URL}/api/store/${query}?country=${country}`);
-        
-        if (data.length !== "404") {
-          setSearchResults(data);
-        }
+        navigate(`/${appId}`);
       } else {
-        showToast(5000, "Invalid Steam URL.");
+        navigate(`/?term=${query}`);
       }
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-      showToast(3000, "Unable to search for Steam game. Please try again later.");
-    }
+
+      setQuery("");
+      setIsButtonDisabled(true);
   };
 
   function handleKeyDown(event) {
     if (event.key === 'Enter') {
       if (query) {
-        fetchUserData();
+        fetchUserData(query);
       }
     }
   };
@@ -97,7 +89,7 @@ export default function SearchBar({ country, setResponse, setLoading, setSearchR
         onKeyDown={handleKeyDown}
         />
         <IconButton
-          onClick={fetchUserData}
+          onClick={() => fetchUserData(query)}
           disabled={isButtonDisabled}
           size="small"
           sx={{

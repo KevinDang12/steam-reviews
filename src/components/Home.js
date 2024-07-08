@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../styles/Home.css';
-import SearchBar from './SearchBar';
 import SteamResult from './SteamResult';
-import SteamReview from './SteamReview';
 import axios from 'axios';
 import CountrySelect from './CountrySelectDialog';
-import IconButton from '@mui/material/IconButton';
 import Snackbar from '@mui/material/Snackbar';
-import InfoIcon from '@mui/icons-material/Info';
 import InfoDialog from './InfoDialog';
 import LoadingBar from './LoadingBar';
-import AdComponent from '../ads/AdComponent';
+import MediaQuery from 'react-responsive';
+import { useLocation } from 'react-router-dom';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import HorizontalAdBanner from '../ads/728x90Banner';
+import Navbar from './NavBar';
 
 // option to switch to different country, select country that Steam supports
 
@@ -53,19 +53,14 @@ import AdComponent from '../ads/AdComponent';
   Update Toast/Loading Bar to MUI ^
   */
 
-export default function Home() {
+export default function Home(props) {
 
-  const [ showReview, setShowReview ] = useState(false);
-  const [ appId, setAppId ] = useState("");
-  const [ steamReview, setSteamReview ] = useState({});
-  const [ response, setResponse ] = useState([]);
+  const { country, setCountry } = props;
+
   const [ loading, setLoading ] = useState(false);
-  const [ loadReviews, setLoadReviews ] = useState(false);
   const [ searchResults, setSearchResults ] = useState([]);
-  const [ country, setCountry ] = useState("us");
   const [ countryDialogOpen, setCountryDialogOpen ] = useState(false);
   const [ infoOpen, setInfoOpen ] = useState(false);
-  const [ searched, setSearched ] = useState(false);
 
   const [ toastOpen, setToastOpen ] = useState(false);
   const [ toastMessage, setToastMessage ] = useState("");
@@ -74,6 +69,62 @@ export default function Home() {
   const [ countries, setCountries ] = useState([]);
   const [ status, setStatus ] = useState(false);
   const [ showError, setShowError ] = useState(false);
+  const [ showIcon, setShowIcon ] = useState(false);
+
+  const [ errorMessage, setErrorMessage ] = useState("");
+  const [ className, setClassName ] = useState("search-bar-container");
+
+  const location = useLocation();
+
+  const adDivRef1 = useRef(null);
+  const adDivRef2 = useRef(null);
+
+  useEffect(() => {
+      const insertScript = (atOptions, ref) => {
+          const conf = document.createElement('script');
+          const s = document.createElement('script');
+
+          conf.innerHTML = `window.atOptions = ${JSON.stringify(atOptions)};`;
+          s.type = 'text/javascript';
+          s.src = `//www.topcreativeformat.com/${atOptions.key}/invoke.js`;
+
+          if (ref.current && !ref.current.firstChild) {
+              ref.current.appendChild(conf);
+              ref.current.appendChild(s);
+          }
+      };
+
+      const atOptions1 = {
+          key: '9a24fe8117a1638c942110c0d4f4c2b0',
+          format: 'iframe',
+          height: 300,
+          width: 160,
+          params: {}
+      };
+
+      const atOptions2 = {
+          key: '987c31b0d0867252ba14295f3ad07915',
+          format: 'iframe',
+          height: 600,
+          width: 160,
+          params: {}
+      };
+
+      const adBanner1 = adDivRef1.current;
+      const adBanner2 = adDivRef2.current;
+
+      insertScript(atOptions1, adDivRef1);
+      setTimeout(() => insertScript(atOptions2, adDivRef2), 750);
+
+      return () => {
+          if (adBanner1) {
+            adBanner1.innerHTML = '';
+          }
+          if (adBanner2) {
+            adBanner2.innerHTML = '';
+          }
+      };
+  }, [className]);
 
   useEffect(() => {
     async function getCountries() {
@@ -92,47 +143,60 @@ export default function Home() {
     async function serverStatus() {
       try {
         let { data } = await axios.get(`${process.env.REACT_APP_URL}/api/status`);
-        if (data === "The server is running") {
-          setStatus(true);
-        } else {
+        if (data !== "The server is running") {
           setShowError(true);
+          setErrorMessage("Unable to search for Steam games. Please try again later.");
           setStatus(false);
+        } else {
+          setStatus(true);
         }
       } catch (err) {
         setShowError(true);
         setStatus(false);
+        setErrorMessage("Unable to search for Steam games. Please try again later.");
       }
     }
+    setShowError(false);
     serverStatus();
   }, []);
+
+  useEffect(() => {
+    async function fetchUserData(query) {
+      try {
+        setLoading(true);
+        const { data } = await axios.get(`${process.env.REACT_APP_URL}/api/store/${query}?country=${country}`);
+        if (data.length <= 0) {
+          setErrorMessage("0 results match your search.");
+          setShowError(true);
+        }
+        setSearchResults(data);
+        setLoading(false);
+      } catch (err) {
+        setLoading(false);
+        setShowError(true);
+        setErrorMessage("0 results match your search.");
+      }
+    }
+
+    if (status) {
+      const searchParams = new URLSearchParams(location.search);
+      const query = searchParams.get('term');
+      if (query !== null) {
+        fetchUserData(query);
+        setShowIcon(false);
+      } else {
+        setShowIcon(true);
+        setSearchResults([]);
+        setShowError(false);
+      }
+    }
+  }, [location.search, status, country]);
 
   function handleCountryDialog() {
     if (countries.length > 0) {
       setCountryDialogOpen(true);
     } else {
       showToast(3000, "Unable to select country. Please try again later.");
-    }
-  }
-
-  async function getResponse(appId) {
-    try {
-      setLoadReviews(true);
-      let steamReview = await axios.get(`${process.env.REACT_APP_URL}/api/gamedetails/${appId}?country=${country}`);
-      if (steamReview.data === 404) {
-        showToast(5000, "Invalid Steam URL.");
-        setLoadReviews(false);
-        return;
-      } else {
-        setSteamReview(steamReview.data);
-        setAppId(appId);
-        setShowReview(true);
-        setLoadReviews(false);
-        const response = await axios.get(`${process.env.REACT_APP_URL}/api/reviews/${appId}?country=${country}`);
-        setResponse(response.data);
-      }
-    } catch (err) {
-      setLoadReviews(false);
-      showToast(3000, "Unable to fetch Steam details and reviews. Please try again later.");
     }
   }
 
@@ -146,157 +210,140 @@ export default function Home() {
     setToastOpen(false);
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setClassName("search-bar-container");
+      } else {
+        setClassName("search-bar-container-mobile");
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    handleResize();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
     <div className="App">
+      <Navbar
+        status={status}
+        country={country}
+        setInfoOpen={setInfoOpen}
+        handleCountryDialog={handleCountryDialog}
+      />
       {
-        loadReviews ?
-
-        <div className='loading-bar-container'>
-          <div style={{ height: '100vh'}}>
-            <LoadingBar />
-          </div>
-        </div> :
-
         <div className='container'>
-          <div className="left-component">
-            <AdComponent />
-          </div>
-          <div className='search-bar-container'>
-            {
-              showReview ? 
-              <div>
-                <SteamReview 
-                  appId={appId}
-                  result={steamReview}
-                  response={response}
-                  setResponse={setResponse}
-                  setShowReview={setShowReview}
-                  country={country}
-                />
-              </div> : (
+          <MediaQuery minDeviceWidth={1024}>
+            <div className="left-component">
+              <div ref={adDivRef1}></div>
+              {/* <LeftAdBanner /> */}
+            </div>
+          </MediaQuery>
+          <div className={className}>
+            {(
               <>
-                <div className='search-bar'>
-                    <SearchBar
-                      setResponse={setResponse}
-                      setLoading={setLoading}
-                      setSearchResults={setSearchResults}
-                      setShowReview={setShowReview}
-                      getResponse={getResponse}
-                      country={country}
-                      setSearched={setSearched}
-                      showToast={showToast}
-                      status={status}
-                    />
-                    <div className='menu-icons'>
-                      <CountrySelect
-                        country={country} 
-                        setCountry={setCountry} 
-                        setOpen={setCountryDialogOpen} 
-                        open={countryDialogOpen}
-                        countries={countries}
-                      />
-                      <IconButton
-                        size="large"
-                        onClick={handleCountryDialog}
-                        sx={{
-                            margin: '10px 5px 0 5px',
-                            color: 'white',
-                            height: '50px',
-                            width: '50px',
-                            '&:hover': {
-                              backgroundColor: 'lightgray',
-                            },
-                        }}
-                        >
-                        <img
-                          loading="lazy"
-                          width="50"
-                          srcSet={`https://flagcdn.com/w40/${country}.png 2x`}
-                          src={`https://flagcdn.com/w20/${country}.png`}
-                          alt=""
-                        />
-                    </IconButton>
-                    <InfoDialog
-                      open={infoOpen}
-                      setOpen={setInfoOpen}
-                    />
-                    <IconButton
-                        size="small"
-                        onClick={() => setInfoOpen(true)}
-                        sx={{
-                            margin: '10px 5px 0 5px',
-                            color: 'white',
-                            height: '50px',
-                            width: '50px',
-                            '&:hover': {
-                              backgroundColor: 'darkgray',
-                            },
-                        }}
-                      >
-                        <InfoIcon 
-                          fontSize="small"
-                          sx={{
-                            height: '30px',
-                            width: '30px',
-                          }}
-                        />
-                      </IconButton>
-                    </div>
-                </div>
                 {
                   loading ? 
-        
+          
                   <div className='loading-bar-container'>
-                    <div style={{ height: '100vh'}}>
+                    <div style={{ height: '80vh' }}>
                       <LoadingBar />
                     </div>
                   </div> :
-        
+
                   <div className='results-container'>
                     {
-                      ((searchResults.length === 0 && searched) || !status) ?
-                      <div className='error-container'>
-                        <h1 className='error-message'>
-                            {
-                              status ?
-                              <div>0 results match your search.</div> : 
-                              (
-                                showError ? 
-                                <div>Unable to search for Steam games. Please try again later.</div>
-                                : <></>
-                              )
-                            }
-                          </h1>
-                      </div> :
-                      searchResults.map((result) => {
+                      (searchResults.length === 0) ?
+                      <>
+                        {
+                          showError ?
+                          <h1 className='error-message'>{errorMessage}</h1> : 
+                          (
+                            showIcon &&
+                            <div style={{alignItems: 'center', margin: 'auto 0'}}>
+                              <SportsEsportsIcon
+                                sx={{
+                                  color: 'white',
+                                  fontSize: 300,
+                                }}
+                              />
+                              <p className='error-message'>Search for a Steam game to get the review summary.</p>
+                              <MediaQuery maxWidth={1023}>
+                                <div style={{ margin: '50px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                  <HorizontalAdBanner
+                                    optionKey={"b60371fabf2b5c5d6242d20d7f155218"}
+                                    height={250}
+                                    width={300}
+                                  />
+                                </div>
+                              </MediaQuery>
+                            </div>
+                          )
+                        }
+                      </> :
+                      <>
+                      {searchResults.map((result) => {
                         return (
                           <SteamResult
-                            getResponse={() => getResponse(result.id)}
                             key={result.id}
+                            appId={result.id}
                             image={result.image}
                             name={result.name}
                             price={result.price}
                             currency={result.currency}
                           />
                         )
-                      })
+                      })}
+                      <MediaQuery maxWidth={1023}>
+                        <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                          <HorizontalAdBanner
+                            optionKey={"b60371fabf2b5c5d6242d20d7f155218"}
+                            height={250}
+                            width={300}
+                          />
+                        </div>
+                      </MediaQuery>
+                      </>
                     }
                   </div>
                 }
               </>
             )}
           </div>
-          <div className="right-component">
-            <AdComponent />
-          </div>
+          
+          <MediaQuery minDeviceWidth={1024}>
+            <div className="right-component">    
+                <div ref={adDivRef2}></div>
+                {/* <RightAdBanner /> */}
+            </div>
+          </MediaQuery>
         </div>
       }
+
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         autoHideDuration={toastDuration}
         open={toastOpen}
         onClose={handleClose}
         message={toastMessage}
+      />
+
+      <CountrySelect
+        country={country} 
+        setCountry={setCountry} 
+        setOpen={setCountryDialogOpen} 
+        open={countryDialogOpen}
+        countries={countries}
+      />
+
+      <InfoDialog
+        open={infoOpen}
+        setOpen={setInfoOpen}
       />
     </div>
   );

@@ -150,7 +150,7 @@ app.get('/api/status', (req, res) => {
 function cleanText(text) {
   text = text.replace(/[^\p{L}\p{N}\p{P}\s]/gu, '');
 
-  text = text.replace(/([^\s\p{P}])\1{2,}/gu, '$1$1');
+  text = text.replace(/(.)\1{2,}/g, '$1$1');
 
   const urlPattern = /(https?|ftp):\/\/[^\s/$.?#].[^\s]*/gi;
 
@@ -336,6 +336,10 @@ app.get('/api/gamedetails/:appId', async (req, res) => {
       genres = data.genres.map(genre => genre.description);
     }
 
+    let playerCount = await axios.get(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${appId}`);
+
+    playerCount = playerCount.data.response.player_count;
+
     let result = {
       name: data.name,
       image: data.header_image,
@@ -347,12 +351,12 @@ app.get('/api/gamedetails/:appId', async (req, res) => {
       release_date: data.release_date?.date ?? "No release date available",
       description: data.short_description,
       genres: genres,
+      player_count: playerCount,
     };
 
     res.send(result);
   } catch (error) {
     res.send("404");
-    console.error(error);
     console.error('Failed to fetch data from Steam Reviews');
   }
 });

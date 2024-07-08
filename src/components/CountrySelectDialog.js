@@ -53,6 +53,10 @@ export default function CountrySelect({ country, setCountry, setOpen, open, coun
           <Autocomplete
             sx={{
               width: 250,
+              '@media only screen and (max-width: 435px)': {
+                width: 130,
+                margin: '5px',
+              },
               margin: '10px',
               ...textStyles.text,
               '& .MuiOutlinedInput-root': {

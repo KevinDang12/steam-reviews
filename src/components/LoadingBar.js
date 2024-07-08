@@ -11,7 +11,7 @@ export default function LoadingBar() {
         <div className='LoadPage'>
             <ThreeDots
                 visible={true}
-                height={100}
+                height={50}
                 width={100}
                 color="#fff"
                 radius="6"

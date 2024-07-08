@@ -1,6 +1,22 @@
 :root {
   --text-color: white;
   --text-font: Inter, sans-serif;
+  --text-size: 12px;
+}
+
+.review-page {
+  background-color: #212121;
+  padding: 24px 0;
+}
+
+.review-box {
+  padding: 0 20%;
+  @media only screen and (min-width: 1025px) {
+    padding: 0 30%;
+  };
+  @media only screen and (max-width: 768px) {
+    padding: 0 10%;
+  };
 }
 
 .clickable-text {
@@ -35,6 +51,9 @@
   margin: 5px;
   color: var(--text-color);
   font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
 }
 
 .section-header {
@@ -47,12 +66,27 @@
   margin: 10px;
   color: var(--text-color);
   font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
 }
 
 .review-description {
   margin: 10px 15px 15px;
   color: var(--text-color);
   font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
+}
+
+.player-count {
+  margin: 10px 15px 5px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
 }
 
 .score {
@@ -83,12 +117,33 @@
   margin: 0 15px;
   color: var(--text-color);
   font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
+}
+
+.mobile-text {
+  margin: 10px 15px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
 }
 
 .release-date {
   margin: 0 25px 0 auto;
   color: var(--text-color);
   font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
+}
+
+.loading-bar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .loading-container {
@@ -107,15 +162,22 @@
 
 .review-summary {
   margin: 0 auto 10px;
+  text-align: center;
   font-size: 18px;
   color: var(--text-color);
   font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
 }
 
 .summary {
   margin: 5px 15px;
   color: var(--text-color);
   font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
 }
 
 .disclaimer {
@@ -123,4 +185,7 @@
   font-size: 10px;
   color: var(--text-color);
   font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: 8px;
+  }
 }

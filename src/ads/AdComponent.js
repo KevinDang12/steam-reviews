@@ -1,27 +1,18 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 
-export default function AdComponent() {
-  const adRef = useRef(null);
-
+const AdComponent = () => {
   useEffect(() => {
-    if (adRef.current) {
-      try {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (e) {
-        console.error("Ad push error:", e);
-      }
-    }
+    const script = document.createElement('script');
+    script.src = '//pl23707920.highrevenuenetwork.com/299300832f0c2d60bd546f6d7151ef75/invoke.js';
+    script.async = true;
+    script.setAttribute('data-cfasync', 'false');
+    document.body.appendChild(script);
   }, []);
 
   return (
-    <ins 
-      className="adsbygoogle"
-      ref={adRef}
-      style={{ display: "block", backgroundColor: "white", width: "50%" }}
-      data-ad-client={`${process.env.REACT_APP_AD_CLIENT}`}
-      data-ad-slot={`${process.env.REACT_APP_AD_SLOT}`}
-      data-ad-format="vertical"
-      data-full-width-responsive="true"
-    />
+    <div id="container-299300832f0c2d60bd546f6d7151ef75"></div>
   );
 };
+
+export default AdComponent;
+
