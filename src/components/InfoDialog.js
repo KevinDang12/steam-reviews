@@ -21,7 +21,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogActions-root': {
       padding: theme.spacing(1),
     },
-  }));
+}));
 
 export default function InfoDialog({ setOpen, open }) {
 
@@ -43,7 +43,7 @@ export default function InfoDialog({ setOpen, open }) {
   function openInNewTab(url) {
     const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
     if (newWindow) newWindow.opener = null
-}
+  }
 
   return (
     <React.Fragment>

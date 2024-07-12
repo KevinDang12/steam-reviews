@@ -15,12 +15,12 @@ export default function NavDrawer({ country, setInfoOpen, handleCountryDialog })
     setOpen(newOpen);
   };
 
-  const openCountryDialog = () => {
+  function openCountryDialog() {
     handleCountryDialog(true);
     setOpen(false);
   }
 
-  const openInfoDialog = () => {
+  function openInfoDialog() {
     setInfoOpen(true);
     setOpen(false);
   }

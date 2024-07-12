@@ -11,11 +11,15 @@ export default function SteamResult({ appId, image, name, price, currency }) {
     const navigate = useNavigate();
     price = price ? (price / 100).toFixed(2) : "No price details available";
 
+    function loadReview() {
+        navigate(`/${appId}`);
+    }
+
     return (
         <>
-            <MediaQuery minWidth={769}>
+            <MediaQuery minWidth={1024}>
                 <Box
-                    onClick={() => navigate(`/${appId}`)}
+                    onClick={loadReview}
                     my={1}
                     display="flex"
                     alignItems="center"
@@ -66,7 +70,7 @@ export default function SteamResult({ appId, image, name, price, currency }) {
                 </Box>
             </MediaQuery>
 
-            <MediaQuery maxWidth={768}>
+            <MediaQuery maxWidth={1023}>
                 <Box
                     onClick={() => navigate(`/${appId}`)}
                     my={1}
@@ -85,7 +89,7 @@ export default function SteamResult({ appId, image, name, price, currency }) {
                         !loaded && (
                         <Skeleton variant="rounded" width={231} height={87} 
                             sx={{
-                                marginRight: '20px',
+                                margin: 'auto',
                             }}
                         />
                         )
@@ -115,7 +119,6 @@ export default function SteamResult({ appId, image, name, price, currency }) {
                     </Box>
                 </Box>
             </MediaQuery>
-
         </>
     );
 }

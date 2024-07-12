@@ -4,6 +4,8 @@ import IconButton from '@mui/material/IconButton';
 import InfoIcon from '@mui/icons-material/Info';
 import SearchBar from './SearchBar';
 import NavDrawer from './NavDrawer';
+import icon from '../resource/icon.png';
+import '../styles/NavBar.css';
 
 /**
  * Navbar component
@@ -14,7 +16,7 @@ export default function Navbar({ status, country, setInfoOpen, handleCountryDial
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
       
       <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
-        <MediaQuery maxDeviceWidth={1023}>
+        <MediaQuery maxWidth={1023}>
           <div className='menu-icons-mobile'>
             <NavDrawer
               className="mobile-button"
@@ -27,11 +29,26 @@ export default function Navbar({ status, country, setInfoOpen, handleCountryDial
       </div>
       
       <div style={{ flex: 3, display: 'flex', justifyContent: 'center' }}>
+        <MediaQuery minWidth={768}>
+          <div
+            className='icon'
+          >
+            <img
+              // className='icon'
+              loading="lazy"
+              width="40"
+              height="40"
+              srcSet={icon}
+              src={icon}
+              alt=""
+            />
+          </div>
+        </MediaQuery>
         <SearchBar status={status} />
       </div>
 
       <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-        <MediaQuery minDeviceWidth={1024}>
+        <MediaQuery minWidth={1024}>
           <div className='menu-icons' style={{ display: 'flex', alignItems: 'center' }}>
             <IconButton
               size="large"

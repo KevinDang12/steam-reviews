@@ -47,6 +47,6 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "firebase-tools": "^13.13.0"
+    "firebase-tools": "^13.13.2"
   }
 }

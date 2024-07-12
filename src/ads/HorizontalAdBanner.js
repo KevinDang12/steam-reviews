@@ -1,14 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 
-const LeftAdBanner = () => {
+function HorizontalAdBanner({ optionKey, height, width }) {
     const adDivRef = useRef(null);
 
     useEffect(() => {
-        const insertScript = (atOptions, ref) => {
+        function insertScript(atOptions, ref) {
             const conf = document.createElement('script');
             const s = document.createElement('script');
 
             conf.innerHTML = `window.atOptions = ${JSON.stringify(atOptions)}`;
+            s.dataset.cfasync = 'false';
             s.type = 'text/javascript';
             s.src = `//www.topcreativeformat.com/${atOptions.key}/invoke.js`;
 
@@ -19,25 +20,25 @@ const LeftAdBanner = () => {
         };
 
         const atOptions = {
-            key: '9a24fe8117a1638c942110c0d4f4c2b0',
+            key: optionKey,
             format: 'iframe',
-            height: 300,
-            width: 160,
+            height: height,
+            width: width,
             params: {}
         };
 
         const adBanner = adDivRef.current;
 
-        setTimeout(insertScript(atOptions, adDivRef), 750);
+        setTimeout(() => insertScript(atOptions, adDivRef), 750);
 
         return () => {
             if (adBanner) {
                 adBanner.innerHTML = '';
             }
         };
-    }, []);
+    }, [optionKey, height, width]);
 
-    return <div className="ad-container" ref={adDivRef}></div>;
+    return <div ref={adDivRef}></div>;
 };
 
-export default LeftAdBanner;
+export default HorizontalAdBanner;

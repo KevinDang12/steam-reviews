@@ -114,7 +114,7 @@ async function createChatCompletion(input) {
         "content": [
           {
             "type": "text",
-            "text": "You are a Steam game review assistant for a website that allows users to search for their favourite games from Steam. Your job is to summarize the recent users' reviews. Please summarize the positives and the negatives of the game. Please go into as much detail as possible and remain unbiased. The review summary must be provided in paragraphs and as long as you can. Write as much as you possibly can for the review summary and go into as much detail as possible. Do not list the reviews in bullet points or quotation marks."
+            "text": "You are a Steam game review assistant for a website that allows users to search for their favorite games from Steam. Your job is to summarize the recent users' reviews. You will be provided with the game title and the raw review data. Please summarize the positives and the negatives of the game. Please go into as much detail as possible and remain unbiased. The review summary must be provided in paragraphs and as long as you can. Write as much as you possibly can for the review summary and go into as much detail as possible. Do not list the reviews in bullet points or quotation marks."
           }
         ]
       },
@@ -147,6 +147,8 @@ app.get('/api/status', (req, res) => {
     res.status(200).send('The server is running');
 });
 
+// Repeating words side by side, if period is present, check what causes repeating words
+
 function cleanText(text) {
   text = text.replace(/[^\p{L}\p{N}\p{P}\s]/gu, '');
 
@@ -155,9 +157,10 @@ function cleanText(text) {
   const urlPattern = /(https?|ftp):\/\/[^\s/$.?#].[^\s]*/gi;
 
   text = text.replace(urlPattern, '');
-  text.replace(/\r?\n|\r/g, '');
 
   text = text.trim().replace(/\s+/g, ' ');
+
+  text = text.split(' ').filter((w,i)=> w !== text.split(' ')[i+1]).join(' ');
 
   return text;
 }
@@ -192,12 +195,14 @@ async function createText(appId, nextReview) {
 
       } else if (reviewText.split(' ').length + result.split(' ').length >= minTextLength && reviewText.split(' ').length + result.split(' ').length < maxTextLength) {
         reviewText += result + "\n"
-        return reviewText.trim()
+        console.log("1");
+        return [reviewText.trim(), nextCursor];
 
       } else {
         if (result.split(' ').length <= 200) {
           reviewText += result + "\n"
-          return reviewText.trim()
+          console.log("2");
+          return [reviewText.trim(), nextCursor];
 
         } else {
           continue;
@@ -207,9 +212,11 @@ async function createText(appId, nextReview) {
   }
 
   if (reviewText.length > 0) {
-    return reviewText.trim()
+    console.log("3");
+    return [reviewText.trim(), nextCursor];
   } else {
-    return "NO RESULTS";
+    console.log("4");
+    return ["NO RESULTS", ""];
   }
 }
 
@@ -237,32 +244,48 @@ function formatResult(text) {
     return paragraphs;
 }
 
+async function summarize(appId, name, cursor) {
+  let value = await createText(appId, cursor);
+  let result = value[0];
+  let newCursor = value[1];
+  try {
+    if (result === "NO RESULTS") {
+      result = "Unable to summarize reviews. Please try again later.";
+      const paragraphs = formatResult(result);
+      return paragraphs;
+    } else {
+      result = name + "\n" + result;
+      const response = await createChatCompletion(result);
+      const paragraphs = formatResult(response);
+
+      await axios.post(`${process.env.REACT_APP_URL}/db/reviews`, {
+        id: appId,
+        review: paragraphs,
+      });
+  
+      return paragraphs;
+    }
+  } catch (error) {
+    console.error('Failed to summarize reviews');
+    console.error(newCursor);
+    return await summarize(appId, name, newCursor);
+  }
+}
+
 app.get('/api/reviews/:appId', async (req, res) => {
   try {
     const { appId } = req.params;
-
-    const value = await createText(appId, "*");
     const { data } = await axios.get(`${process.env.REACT_APP_URL}/db/reviews/${appId}`);
+    const response = await axios.get(`https://store.steampowered.com/api/appdetails?appids=${appId}`);
 
     let today = new Date();
     today = Math.floor(today.getTime() / 1000);
     const date = data.date + (30 * 24 * 60 * 60);
 
     if (data === "No Document" || today >= date) {
-      if (value === "NO RESULTS") {
-        const paragraphs = formatResult(value);
-        res.send(paragraphs);
-      } else {
-        const response = await createChatCompletion(value);
-        const paragraphs = formatResult(response);
-
-        res.send(paragraphs);
-
-        await axios.post(`${process.env.REACT_APP_URL}/db/reviews`, {
-          id: appId,
-          review: paragraphs,
-        });
-      }
+      const name = response.data[appId].data.name
+      let result = await summarize(appId, name, "*");
+      res.send(result);
     } else {
       res.send(data.review);
     }
@@ -294,7 +317,7 @@ app.get('/api/store/:game', async (req, res) => {
   } catch (error) {
     res.send("404");
     console.error(error);
-    console.error('Failed to fetch data from Steam Reviews');
+    console.error('Failed to search for game');
   }
 });
 
@@ -336,9 +359,12 @@ app.get('/api/gamedetails/:appId', async (req, res) => {
       genres = data.genres.map(genre => genre.description);
     }
 
-    let playerCount = await axios.get(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${appId}`);
-
-    playerCount = playerCount.data.response.player_count;
+    let playerCount = await axios.get(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${appId}`)
+      .then(response => {
+        return response.data.response.player_count;
+      }).catch(error => {
+        return 0;
+      });
 
     let result = {
       name: data.name,
@@ -347,8 +373,8 @@ app.get('/api/gamedetails/:appId', async (req, res) => {
       full_game: data?.fullgame ?? "",
       review_score: reviews.data.query_summary.review_score,
       review_description: reviews.data.query_summary.review_score_desc,
-      price: data.price_overview?.final_formatted ?? "No price details available",
-      release_date: data.release_date?.date ?? "No release date available",
+      price: data.price_overview?.final_formatted ? data.price_overview.final_formatted : "No price details available",
+      release_date: data.release_date?.date ? data.release_date.date : "No release date available",
       description: data.short_description,
       genres: genres,
       player_count: playerCount,
@@ -357,7 +383,7 @@ app.get('/api/gamedetails/:appId', async (req, res) => {
     res.send(result);
   } catch (error) {
     res.send("404");
-    console.error('Failed to fetch data from Steam Reviews');
+    console.error('Failed to fetch game details');
   }
 });
 

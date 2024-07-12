@@ -17,8 +17,7 @@ export default function SearchBar({ status }) {
     setQuery("");
   }, [location.search]);
 
-  const fetchUserData = async (query) => {
-
+  async function fetchGameData(query) {
       if (query.includes("https://store.steampowered.com/app/") && query.split("/")[4]) {
         const appId = query.split("/")[4];
         navigate(`/${appId}`);
@@ -33,7 +32,7 @@ export default function SearchBar({ status }) {
   function handleKeyDown(event) {
     if (event.key === 'Enter') {
       if (query) {
-        fetchUserData(query);
+        fetchGameData(query);
       }
     }
   };
@@ -49,61 +48,63 @@ export default function SearchBar({ status }) {
 
   return (
     <div className="input-wrapper">
-      <TextField
-        disabled={!status}
-        className="form-control"
-        variant="outlined"
-        InputProps={{
-          background: 'white',
-        }}
-        placeholder={status ? "Search by game or paste the Steam URL" : ""}
-        sx={{
-          '& .MuiInputBase-input': {
-            padding: '15px',
-            marginLeft: '10px',
-            ...textStyles.text,
-          },
-          '& .MuiInputBase-input::placeholder': {
-            ...textStyles.text,
-          },
-          '& .MuiOutlinedInput-root': {
-            background: 'transparent',
-            borderColor: 'none',
-            border: 'none',
-            '& fieldset': {
-              borderColor: 'none',
-              border: 'none',
-            },
-            '&:hover fieldset': {
-              borderColor: 'none',
-              border: 'none',
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: 'none',
-              border: 'none',
-            },
-          },
-        }}
-        value={query}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        />
-        <IconButton
-          onClick={() => fetchUserData(query)}
-          disabled={isButtonDisabled}
-          size="small"
+      <div className='search-box'>
+        <TextField
+          disabled={!status}
+          className="form-control"
+          variant="outlined"
+          InputProps={{
+            background: 'white',
+          }}
+          placeholder={status ? "Search by game or paste the Steam URL" : ""}
           sx={{
-            marginRight: '10px',
-            backgroundColor: 'white',
-            '&:hover': {
-              backgroundColor: 'lightgray',
+            '& .MuiInputBase-input': {
+              padding: '15px',
+              marginLeft: '10px',
+              ...textStyles.text,
             },
-            "&:disabled": {
-              backgroundColor: 'grey'
-            }
-          }}>
+            '& .MuiInputBase-input::placeholder': {
+              ...textStyles.text,
+            },
+            '& .MuiOutlinedInput-root': {
+              background: 'transparent',
+              borderColor: 'none',
+              border: 'none',
+              '& fieldset': {
+                borderColor: 'none',
+                border: 'none',
+              },
+              '&:hover fieldset': {
+                borderColor: 'none',
+                border: 'none',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: 'none',
+                border: 'none',
+              },
+            },
+          }}
+          value={query}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          />
+          <IconButton
+            onClick={() => fetchGameData(query)}
+            disabled={isButtonDisabled}
+            size="small"
+            sx={{
+              marginRight: '10px',
+              backgroundColor: 'white',
+              '&:hover': {
+                backgroundColor: 'lightgray',
+              },
+              "&:disabled": {
+                backgroundColor: 'grey'
+              }
+            }}>
           <ArrowUpwardIcon />
         </IconButton>
+      </div>
     </div>
   );
 };

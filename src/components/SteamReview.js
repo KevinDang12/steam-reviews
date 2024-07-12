@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import SteamRating from './SteamRating';
 import Divider from '@mui/material/Divider';
 import he from 'he';
@@ -14,7 +14,9 @@ import InfoDialog from './InfoDialog';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NotFoundPage from './NotFoundPage';
 import MediaQuery from 'react-responsive';
-import HorizontalAdBanner from '../ads/728x90Banner';
+import HorizontalAdBanner from '../ads/HorizontalAdBanner';
+import LeftAdBanner from '../ads/LeftAdBanner';
+import RightAdBanner from '../ads/RightAdBanner';
 
 export default function SteamReview({ country }) {
 
@@ -23,33 +25,53 @@ export default function SteamReview({ country }) {
     const [ infoOpen, setInfoOpen ] = useState(false);
     const [ response, setResponse ] = useState([]);
     const [ validId, setValidId ] = useState(true);
+    const hasRun = useRef(false);
     
     const navigate = useNavigate();
     const location = useLocation();
+    const appId = location.pathname.split('/')[1];
 
     function redirectToStore(appId) {
         window.open(`https://store.steampowered.com/app/${appId}`);
     }
 
     useEffect(() => {
-        const getResponse = async () => {
-            const appId = location.pathname.split('/')[1];
-            setLoading(true);
+        if (hasRun.current) {
+          return;
+        }
+        hasRun.current = true;
+    
+        async function getResponse() {
+          setLoading(true);
+          console.log('Getting response');
+          try {
             let steamReview = await axios.get(`${process.env.REACT_APP_URL}/api/gamedetails/${appId}?country=${country}`);
-            
+    
             if (steamReview.data === 404) {
-                setValidId(false);
-                setLoading(false);
-                return;
+              setValidId(false);
+              setLoading(false);
+              return;
             }
             setReview(steamReview.data);
             setLoading(false);
+    
             const response = await axios.get(`${process.env.REACT_APP_URL}/api/reviews/${appId}?country=${country}`);
             setResponse(response.data);
             setLoading(false);
+    
+            if (window.gtag) {
+              window.gtag('event', 'steam_review', {
+                'app_name': 'Steam Review Summarizer',
+                'steam_game': `Review for ${steamReview.data.name}`,
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching data:', error);
+            setLoading(false);
+          }
         }
         getResponse();
-    }, [country, location]);
+      }, [country, appId]);
 
     function getReviews() {
         navigate(`/${review.full_game.appid}`);
@@ -61,6 +83,11 @@ export default function SteamReview({ country }) {
                 !validId ? 
                 <NotFoundPage /> :
                 <div className='review-page'>
+                    <div className="left-component">
+                        <MediaQuery minWidth={1024}>
+                            <LeftAdBanner />
+                        </MediaQuery>
+                    </div>
                     <div className='review-box'>
                         {
                             loading ?
@@ -75,7 +102,7 @@ export default function SteamReview({ country }) {
                                 flexDirection='column'
                                 alignItems="left"
                                 p={2}
-                                sx={{ 
+                                sx={{
                                     borderRadius: '15px',
                                     bgcolor: '#2E2D30',
                                     margin: '0',
@@ -198,13 +225,13 @@ export default function SteamReview({ country }) {
                                     <p className='score'>
                                         {review.review_score}/10
                                     </p>
-                                    <MediaQuery minWidth={425}>
+                                    <MediaQuery minWidth={550}>
                                         <p className='overall-review'>
                                             {review.review_description}
                                         </p>
                                     </MediaQuery>
                                 </Box>
-                                <MediaQuery minWidth={500}>
+                                <MediaQuery minWidth={768}>
                                     <Box
                                         display="flex"
                                         alignItems="left"
@@ -232,7 +259,7 @@ export default function SteamReview({ country }) {
                                     </Box>
                                 </MediaQuery>
 
-                                <MediaQuery maxWidth={499}>
+                                <MediaQuery maxWidth={767}>
                                     <p className='section-header'>
                                         PRICE
                                     </p>
@@ -289,7 +316,7 @@ export default function SteamReview({ country }) {
                                     }}
                                 >
                                     <p className='player-count'>
-                                        {review.player_count} In-Game
+                                        {review.player_count > 0 ? `${review.player_count} In-Game` : 'Not available'}
                                     </p>
                                 </Box>
 
@@ -360,24 +387,19 @@ export default function SteamReview({ country }) {
                                 </Button>
                             </Box>
                         }
-                        <MediaQuery minWidth={729}>
                             <div style={{ margin: '20px auto 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                <HorizontalAdBanner
-                                    optionKey={"89c77bd4e7c2fc1c38fc6b4df4ee667b"}
-                                    height={90}
-                                    width={728}
-                                />
+                                <MediaQuery maxWidth={1023}>
+                                    <HorizontalAdBanner
+                                        optionKey={"b60371fabf2b5c5d6242d20d7f155218"}
+                                        height={250}
+                                        width={300}
+                                    />
+                                </MediaQuery>
                             </div>
-                        </MediaQuery>
-
-                        <MediaQuery maxWidth={728}>
-                            <div style={{ margin: '20px auto 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                <HorizontalAdBanner
-                                    optionKey={"b60371fabf2b5c5d6242d20d7f155218"}
-                                    height={250}
-                                    width={300}
-                                />
-                            </div>
+                    </div>
+                    <div className="right-component">
+                        <MediaQuery minWidth={1024}>
+                            <RightAdBanner />
                         </MediaQuery>
                     </div>
                 </div>

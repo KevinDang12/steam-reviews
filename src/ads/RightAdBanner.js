@@ -1,14 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 
-const RightAdBanner = () => {
+function RightAdBanner() {
     const adDivRef = useRef(null);
 
     useEffect(() => {
-        const insertScript = (atOptions, ref) => {
+        function insertScript(atOptions, ref) {
             const conf = document.createElement('script');
             const s = document.createElement('script');
 
             conf.innerHTML = `window.atOptions = ${JSON.stringify(atOptions)}`;
+            s.dataset.cfasync = 'false';
             s.type = 'text/javascript';
             s.src = `//www.topcreativeformat.com/${atOptions.key}/invoke.js`;
 
@@ -28,7 +29,11 @@ const RightAdBanner = () => {
 
         const adBanner = adDivRef.current;
 
-        setTimeout(insertScript(atOptions, adDivRef), 750);
+        if (adBanner) {
+            setTimeout(() => {
+                insertScript(atOptions, adDivRef);
+            }, 500);
+        }
 
         return () => {
             if (adBanner) {

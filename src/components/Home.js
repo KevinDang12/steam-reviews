@@ -9,8 +9,11 @@ import LoadingBar from './LoadingBar';
 import MediaQuery from 'react-responsive';
 import { useLocation } from 'react-router-dom';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
-import HorizontalAdBanner from '../ads/728x90Banner';
+import HorizontalAdBanner from '../ads/HorizontalAdBanner';
 import Navbar from './NavBar';
+import LeftAdBanner from '../ads/LeftAdBanner';
+import RightAdBanner from '../ads/RightAdBanner';
+import debounce from 'lodash/debounce';
 
 // option to switch to different country, select country that Steam supports
 
@@ -67,7 +70,7 @@ export default function Home(props) {
   const [ toastDuration, setToastDuration ] = useState(0);
 
   const [ countries, setCountries ] = useState([]);
-  const [ status, setStatus ] = useState(false);
+  const [ status, setStatus ] = useState(true);
   const [ showError, setShowError ] = useState(false);
   const [ showIcon, setShowIcon ] = useState(false);
 
@@ -75,56 +78,7 @@ export default function Home(props) {
   const [ className, setClassName ] = useState("search-bar-container");
 
   const location = useLocation();
-
-  const adDivRef1 = useRef(null);
-  const adDivRef2 = useRef(null);
-
-  useEffect(() => {
-      const insertScript = (atOptions, ref) => {
-          const conf = document.createElement('script');
-          const s = document.createElement('script');
-
-          conf.innerHTML = `window.atOptions = ${JSON.stringify(atOptions)};`;
-          s.type = 'text/javascript';
-          s.src = `//www.topcreativeformat.com/${atOptions.key}/invoke.js`;
-
-          if (ref.current && !ref.current.firstChild) {
-              ref.current.appendChild(conf);
-              ref.current.appendChild(s);
-          }
-      };
-
-      const atOptions1 = {
-          key: '9a24fe8117a1638c942110c0d4f4c2b0',
-          format: 'iframe',
-          height: 300,
-          width: 160,
-          params: {}
-      };
-
-      const atOptions2 = {
-          key: '987c31b0d0867252ba14295f3ad07915',
-          format: 'iframe',
-          height: 600,
-          width: 160,
-          params: {}
-      };
-
-      const adBanner1 = adDivRef1.current;
-      const adBanner2 = adDivRef2.current;
-
-      insertScript(atOptions1, adDivRef1);
-      setTimeout(() => insertScript(atOptions2, adDivRef2), 750);
-
-      return () => {
-          if (adBanner1) {
-            adBanner1.innerHTML = '';
-          }
-          if (adBanner2) {
-            adBanner2.innerHTML = '';
-          }
-      };
-  }, [className]);
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     async function getCountries() {
@@ -161,28 +115,43 @@ export default function Home(props) {
   }, []);
 
   useEffect(() => {
-    async function fetchUserData(query) {
+    async function searchQuery (query) {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
       try {
         setLoading(true);
-        const { data } = await axios.get(`${process.env.REACT_APP_URL}/api/store/${query}?country=${country}`);
+        setSearchResults([]);
+        const { data } = await axios.get(
+          `${process.env.REACT_APP_URL}/api/store/${query}?country=${country}`,
+          { signal: abortControllerRef.current.signal }
+        );
         if (data.length <= 0) {
           setErrorMessage("0 results match your search.");
           setShowError(true);
+        } else {
+          setSearchResults(data);
+          setShowError(false);
         }
-        setSearchResults(data);
-        setLoading(false);
       } catch (err) {
+        if (!axios.isCancel(err)) {
+          setShowError(true);
+          setErrorMessage("0 results match your search.");
+        }
+      } finally {
         setLoading(false);
-        setShowError(true);
-        setErrorMessage("0 results match your search.");
       }
-    }
+    };
+
+    const debouncedSearchQuery = debounce(searchQuery, 50);
 
     if (status) {
       const searchParams = new URLSearchParams(location.search);
       const query = searchParams.get('term');
-      if (query !== null) {
-        fetchUserData(query);
+      if (query !== null && query !== '') {
+        debouncedSearchQuery(query);
         setShowIcon(false);
       } else {
         setShowIcon(true);
@@ -190,6 +159,13 @@ export default function Home(props) {
         setShowError(false);
       }
     }
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      debouncedSearchQuery.cancel();
+    };
   }, [location.search, status, country]);
 
   function handleCountryDialog() {
@@ -206,12 +182,12 @@ export default function Home(props) {
     setToastMessage(message);
   };
 
-  const handleClose = () => {
+  function handleClose() {
     setToastOpen(false);
   };
 
   useEffect(() => {
-    const handleResize = () => {
+    function handleResize() {
       if (window.innerWidth >= 1024) {
         setClassName("search-bar-container");
       } else {
@@ -238,12 +214,11 @@ export default function Home(props) {
       />
       {
         <div className='container'>
-          <MediaQuery minDeviceWidth={1024}>
             <div className="left-component">
-              <div ref={adDivRef1}></div>
-              {/* <LeftAdBanner /> */}
+              <MediaQuery minWidth={1024}>
+                <LeftAdBanner />
+              </MediaQuery>
             </div>
-          </MediaQuery>
           <div className={className}>
             {(
               <>
@@ -270,17 +245,21 @@ export default function Home(props) {
                                 sx={{
                                   color: 'white',
                                   fontSize: 300,
+                                  transition: 'font-size 0.4s',
+                                  backgroundColor: '#212121',
+                                  '&:hover': {
+                                    fontSize: 350,
+                                    transition: 'font-size 0.4s'
+                                  }
                                 }}
                               />
-                              <p className='error-message'>Search for a Steam game to get the review summary.</p>
+                              <p className='welcome-message'>A Steam game review summarizer that fetches game reviews from Steam, which are then passed to OpenAI to process and generate a summary of the reviews. To get started, search for your game!</p>
                               <MediaQuery maxWidth={1023}>
-                                <div style={{ margin: '50px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                  <HorizontalAdBanner
-                                    optionKey={"b60371fabf2b5c5d6242d20d7f155218"}
-                                    height={250}
-                                    width={300}
-                                  />
-                                </div>
+                                <HorizontalAdBanner
+                                  optionKey={"b60371fabf2b5c5d6242d20d7f155218"}
+                                  height={250}
+                                  width={300}
+                                />
                               </MediaQuery>
                             </div>
                           )
@@ -300,13 +279,11 @@ export default function Home(props) {
                         )
                       })}
                       <MediaQuery maxWidth={1023}>
-                        <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                          <HorizontalAdBanner
-                            optionKey={"b60371fabf2b5c5d6242d20d7f155218"}
-                            height={250}
-                            width={300}
-                          />
-                        </div>
+                        <HorizontalAdBanner
+                          optionKey={"b60371fabf2b5c5d6242d20d7f155218"}
+                          height={250}
+                          width={300}
+                        />
                       </MediaQuery>
                       </>
                     }
@@ -315,13 +292,11 @@ export default function Home(props) {
               </>
             )}
           </div>
-          
-          <MediaQuery minDeviceWidth={1024}>
-            <div className="right-component">    
-                <div ref={adDivRef2}></div>
-                {/* <RightAdBanner /> */}
-            </div>
-          </MediaQuery>
+          <div className="right-component">    
+            <MediaQuery minWidth={1024}>
+              <RightAdBanner />
+            </MediaQuery>
+          </div>
         </div>
       }
 

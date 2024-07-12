@@ -21,10 +21,10 @@ function App() {
             }
           />
           <Route path={`/:id`} element={
-                  <div>
-                    <SteamReview country={country}/>
-                  </div>
-                }
+            <div>
+              <SteamReview country={country}/>
+            </div>
+          }
           />
           <Route path={`/?term=:name`}
             element={

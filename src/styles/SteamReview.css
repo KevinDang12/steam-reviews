@@ -7,16 +7,36 @@
 .review-page {
   background-color: #212121;
   padding: 24px 0;
+  @media only screen and (min-width: 1024px) {
+    display: flex;
+  };
 }
 
 .review-box {
-  padding: 0 20%;
-  @media only screen and (min-width: 1025px) {
-    padding: 0 30%;
+  flex: 2;
+  @media only screen and (min-width: 1024px) {
+    padding: 5px 20px;
   };
-  @media only screen and (max-width: 768px) {
+  @media only screen and (min-width: 768px) {
     padding: 0 10%;
   };
+  @media only screen and (min-width: 320px) {
+    padding: 0 5%;
+  };
+}
+
+.left-component {
+  flex: 1;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+}
+
+.right-component {
+  flex: 1;
+  display: flex;
+  justify-content: left;
+  align-items: center;
 }
 
 .clickable-text {
@@ -90,13 +110,13 @@
 }
 
 .score {
-  margin: 10px 0;
+  margin: 15px 0;
   color: var(--text-color);
   font-family: var(--text-font);
 }
 
 .overall-review {
-  margin: 10px 25px 10px auto;
+  margin: 15px 25px 15px auto;
   color: var(--text-color);
   font-family: var(--text-font);
 }
