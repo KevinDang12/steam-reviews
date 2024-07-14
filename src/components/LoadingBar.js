@@ -2,10 +2,6 @@ import React from 'react';
 import { ThreeDots } from 'react-loader-spinner';
 import '../styles/LoadingBar.css';
 
-/**
- * The Loading Page Component
- * @returns The React Loading Component
- */
 export default function LoadingBar() {
     return (
         <div className='LoadPage'>

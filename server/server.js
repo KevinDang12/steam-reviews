@@ -147,8 +147,6 @@ app.get('/api/status', (req, res) => {
     res.status(200).send('The server is running');
 });
 
-// Repeating words side by side, if period is present, check what causes repeating words
-
 function cleanText(text) {
   text = text.replace(/[^\p{L}\p{N}\p{P}\s]/gu, '');
 

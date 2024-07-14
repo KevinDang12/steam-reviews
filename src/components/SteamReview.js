@@ -43,7 +43,6 @@ export default function SteamReview({ country }) {
     
         async function getResponse() {
           setLoading(true);
-          console.log('Getting response');
           try {
             let steamReview = await axios.get(`${process.env.REACT_APP_URL}/api/gamedetails/${appId}?country=${country}`);
     

@@ -7,10 +7,6 @@ import NavDrawer from './NavDrawer';
 import icon from '../resource/icon.png';
 import '../styles/NavBar.css';
 
-/**
- * Navbar component
- * @return {JSX.Element} Navbar component
- */
 export default function Navbar({ status, country, setInfoOpen, handleCountryDialog }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
@@ -34,7 +30,6 @@ export default function Navbar({ status, country, setInfoOpen, handleCountryDial
             className='icon'
           >
             <img
-              // className='icon'
               loading="lazy"
               width="40"
               height="40"
