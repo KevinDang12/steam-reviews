@@ -73,6 +73,64 @@ export default function Home(props) {
     serverStatus();
   }, []);
 
+  async function sendAnalytics(eventParams) {
+    await axios.post(`${process.env.REACT_APP_URL}/db/analytics`, eventParams);
+  }
+
+  useEffect(() => {
+    async function eventLogging() {
+      if (window.gtag) {
+        const userAgent = navigator.userAgent;
+        let date = new Date();
+        date = Math.floor(date.getTime() / 1000);
+
+        try {
+          const response = await axios.get('https://geolocation-db.com/json/');
+          const data = response.data;
+          
+          window.gtag('get', 'G-YDB7239WQW', 'client_id', async (clientId) => {
+            const eventParams = {
+              'date': date,
+              'ip': data.IPv4,
+              'city': data.city,
+              'country': data.country_name,
+              'state': data.state,
+              'user_agent': userAgent,
+              'country_code': data.country_code,
+              'latitude': data.latitude,
+              'longitude': data.longitude,
+              'postal': data.postal,
+              'client_web_id': clientId.toString(),
+            };
+            await sendAnalytics(eventParams);
+          });
+  
+        } catch (error) {
+          console.error('Error fetching geolocation data:', error);
+          window.gtag('get', 'G-YDB7239WQW', 'client_id', async (clientId) => {
+            let response;
+            try {
+                response = await axios.get('https://checkip.amazonaws.com/');
+                response = response.data.replace(/(\r\n|\n|\r)/gm, "");
+            } catch (error) {
+                response = null;
+            }
+
+            const eventParams = {
+              'date': date,
+              'ip': response,
+              'user_agent': userAgent,
+              'client_web_id': clientId.toString(),
+            };
+            
+            await sendAnalytics(eventParams);
+          });
+        }
+      }
+    }
+    eventLogging();
+  }, []);
+
   useEffect(() => {
     async function searchQuery (query) {
       if (abortControllerRef.current) {
@@ -175,7 +233,7 @@ export default function Home(props) {
         <div className='container'>
             <div className="left-component">
               <MediaQuery minWidth={1024}>
-                <LeftAdBanner />
+                {/* <LeftAdBanner /> */}
               </MediaQuery>
             </div>
           <div className={className}>
@@ -212,13 +270,13 @@ export default function Home(props) {
                                   }
                                 }}
                               />
-                              <p className='welcome-message'>A Steam game review summarizer that fetches game reviews from Steam, which are then passed to OpenAI to process and generate a summary of the reviews. To get started, search for your game!</p>
+                              <h1 className='welcome-message'>A Steam game review summarizer that fetches game reviews from Steam, which are then passed to OpenAI to process and generate a summary of the reviews. To get started, search for your game!</h1>
                               <MediaQuery maxWidth={1023}>
-                                <HorizontalAdBanner
+                                {/* <HorizontalAdBanner
                                   optionKey={"b60371fabf2b5c5d6242d20d7f155218"}
                                   height={250}
                                   width={300}
-                                />
+                                /> */}
                               </MediaQuery>
                             </div>
                           )
@@ -238,11 +296,11 @@ export default function Home(props) {
                         )
                       })}
                       <MediaQuery maxWidth={1023}>
-                        <HorizontalAdBanner
+                        {/* <HorizontalAdBanner
                           optionKey={"b60371fabf2b5c5d6242d20d7f155218"}
                           height={250}
                           width={300}
-                        />
+                        /> */}
                       </MediaQuery>
                       </>
                     }
@@ -253,7 +311,7 @@ export default function Home(props) {
           </div>
           <div className="right-component">    
             <MediaQuery minWidth={1024}>
-              <RightAdBanner />
+              {/* <RightAdBanner /> */}
             </MediaQuery>
           </div>
         </div>

@@ -17,6 +17,7 @@ import MediaQuery from 'react-responsive';
 import HorizontalAdBanner from '../ads/HorizontalAdBanner';
 import LeftAdBanner from '../ads/LeftAdBanner';
 import RightAdBanner from '../ads/RightAdBanner';
+import { analytics, logEvent } from '../firebase/analytics';
 
 export default function SteamReview({ country }) {
 
@@ -35,11 +36,78 @@ export default function SteamReview({ country }) {
         window.open(`https://store.steampowered.com/app/${appId}`);
     }
 
+    function logReviewEvent(eventParams) {
+        logEvent(analytics, 'firebase_user_game_select', eventParams);
+    }
+
+    async function sendAnalytics(eventParams) {
+        await axios.post(`${process.env.REACT_APP_URL}/db/analytics`, eventParams);
+    }
+
     useEffect(() => {
         if (hasRun.current) {
           return;
         }
         hasRun.current = true;
+
+        async function eventLogging(name) {
+            if (window.gtag) {
+                window.gtag('event', `user_game_select_count`, {
+                    'steam_review': `Review for: ${name}`,
+                });
+                let date = new Date();
+                date = Math.floor(date.getTime() / 1000);
+                const userAgent = navigator.userAgent;
+
+                try {
+                    const response = await axios.get('https://geolocation-db.com/json/');
+                    const data = response.data;
+                    
+                    window.gtag('get', 'G-YDB7239WQW', 'client_id', async (clientId) => {
+                      const eventParams = {
+                        'steam_review': `Review for: ${name}`,
+                        'date': date,
+                        'ip': data.IPv4,
+                        'city': data.city,
+                        'country': data.country_name,
+                        'state': data.state,
+                        'user_agent': userAgent,
+                        'country_code': data.country_code,
+                        'latitude': data.latitude,
+                        'longitude': data.longitude,
+                        'postal': data.postal,
+                        'client_web_id': clientId.toString(),
+                      };
+                        window.gtag('event', `user_game_select`, eventParams);
+                        logReviewEvent(eventParams);
+                        await sendAnalytics(eventParams);
+                    });
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    window.gtag('get', 'G-YDB7239WQW', 'client_id', async (clientId) => {
+                        let response;
+                        try {
+                            response = await axios.get('https://checkip.amazonaws.com/');
+                            response = response.data.replace(/(\r\n|\n|\r)/gm, "");
+                        } catch (error) {
+                            response = null;
+                        }
+
+                        const eventParams = {
+                          'steam_review': `Review for: ${name}`,
+                          'date': date,
+                          'ip': response,
+                          'user_agent': userAgent,
+                          'client_web_id': clientId.toString(),
+                        };
+                        
+                        window.gtag('event', `user_game_select`, eventParams);
+                        logReviewEvent(eventParams);
+                        await sendAnalytics(eventParams);
+                    });
+                }
+            }
+        }
     
         async function getResponse() {
           setLoading(true);
@@ -57,13 +125,9 @@ export default function SteamReview({ country }) {
             const response = await axios.get(`${process.env.REACT_APP_URL}/api/reviews/${appId}?country=${country}`);
             setResponse(response.data);
             setLoading(false);
-    
-            if (window.gtag) {
-              window.gtag('event', 'steam_review', {
-                'app_name': 'Steam Review Summarizer',
-                'steam_game': `Review for ${steamReview.data.name}`,
-              });
-            }
+            
+            eventLogging(steamReview.data.name);
+            
           } catch (error) {
             console.error('Error fetching data:', error);
             setLoading(false);
@@ -84,7 +148,7 @@ export default function SteamReview({ country }) {
                 <div className='review-page'>
                     <div className="left-component">
                         <MediaQuery minWidth={1024}>
-                            <LeftAdBanner />
+                            {/* <LeftAdBanner /> */}
                         </MediaQuery>
                     </div>
                     <div className='review-box'>
@@ -388,17 +452,17 @@ export default function SteamReview({ country }) {
                         }
                             <div style={{ margin: '20px auto 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                 <MediaQuery maxWidth={1023}>
-                                    <HorizontalAdBanner
+                                    {/* <HorizontalAdBanner
                                         optionKey={"b60371fabf2b5c5d6242d20d7f155218"}
                                         height={250}
                                         width={300}
-                                    />
+                                    /> */}
                                 </MediaQuery>
                             </div>
                     </div>
                     <div className="right-component">
                         <MediaQuery minWidth={1024}>
-                            <RightAdBanner />
+                            {/* <RightAdBanner /> */}
                         </MediaQuery>
                     </div>
                 </div>

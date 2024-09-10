@@ -3,17 +3,17 @@
   "name": "A web app that summarizes Steam reviews using OpenAI's GPT-3.5",
   "icons": [
     {
-      "src": "icon.ico",
+      "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "icon192.png",
+      "src": "logo192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "icon512.png",
+      "src": "logo512.png",
       "type": "image/png",
       "sizes": "512x512"
     }

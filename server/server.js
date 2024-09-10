@@ -37,6 +37,80 @@ const openai = new OpenAI({
   apiKey: process.env.REACT_APP_API_KEY,
 });
 
+app.post('/db/analytics', async (req, res) => {
+  try {
+    const id = req.body.client_web_id;
+
+    const reviewDocRef = db.collection('analytics').doc(id.toString());
+    const doc = await reviewDocRef.get();
+
+    let date = new Date();
+    date = Math.floor(date.getTime() / 1000);
+
+    if (!doc.exists) {
+      const eventParams = {
+        date: date,
+        ip: req.body.ip,
+        city: req.body.city ?? null,
+        country: req.body.country ?? null,
+        state: req.body.state ?? null,
+        user_agent: req.body.user_agent,
+        country_code: req.body.country_code ?? null,
+        latitude: req.body.latitude ?? null,
+        longitude: req.body.longitude ?? null,
+        postal: req.body.postal ?? null,
+      };
+      
+      if (req.body.search_query) {
+        const search_query = {'search_query': req.body.search_query, 'date': date};
+        await reviewDocRef.set({
+          search_query: [search_query],
+          steam_review: [],
+          search_query_count: 1,
+          steam_review_count: 0,
+          ...eventParams,
+        });
+      } else if (req.body.steam_review) {
+        const steam_review = {'steam_review': req.body.steam_review, 'date': date};
+        await reviewDocRef.set({
+          search_query: [],
+          steam_review: [steam_review],
+          search_query_count: 0,
+          steam_review_count: 1,
+          ...eventParams,
+        });
+      } else {
+        await reviewDocRef.set({
+          search_query: [],
+          steam_review: [],
+          search_query_count: 0,
+          steam_review_count: 0,
+          ...eventParams,
+        });
+      }
+    } else {
+      if (req.body.search_query) {
+        const search_query = {'search_query': req.body.search_query, 'date': date};
+        await reviewDocRef.update({
+          search_query_count: doc.data().search_query_count + 1,
+          search_query: [...doc.data().search_query, search_query],
+        });
+      } else if (req.body.steam_review) {
+        const steam_review = {'steam_review': req.body.steam_review, 'date': date};
+        await reviewDocRef.update({
+          steam_review_count: doc.data().steam_review_count + 1,
+          steam_review: [...doc.data().steam_review, steam_review],
+        });
+      }
+    }
+
+    res.send("Analytic added to database");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error adding data');
+  }
+});
+
 app.post('/db/reviews', async (req, res) => {
   try {
     const review = req.body.review;

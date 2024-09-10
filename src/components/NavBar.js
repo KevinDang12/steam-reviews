@@ -30,7 +30,7 @@ export default function Navbar({ status, country, setInfoOpen, handleCountryDial
             className='icon'
           >
             <img
-              loading="lazy"
+              title="Logo"
               width="40"
               height="40"
               srcSet={icon}
@@ -59,8 +59,9 @@ export default function Navbar({ status, country, setInfoOpen, handleCountryDial
               }}
             >
               <img
-                loading="lazy"
-                width="50"
+                title="Country Flag"
+                width="30"
+                height="15"
                 srcSet={`https://flagcdn.com/w40/${country}.png 2x`}
                 src={`https://flagcdn.com/w20/${country}.png`}
                 alt=""
