@@ -1,0 +1,13 @@
+.error-page {
+    display: flex;
+    align-items: center;
+    height: 100vh;
+}
+
+.error-header {
+    color: white;
+    font-weight: normal;
+    font-family: Inter, sans-serif;
+    text-align: center;
+    margin: auto;
+}

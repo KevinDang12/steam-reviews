@@ -1,0 +1,14 @@
+.icon {
+    display: flex;
+    align-items: center;
+    margin: 20px 15px 10px 0;
+    @media screen and (min-width: 1440px) {
+        margin: 20px 15px 10px 2%;
+    };
+    @media screen and (min-width: 1920px) {
+        margin: 20px 15px 10px 3%;
+    };
+    @media screen and (min-width: 2560px) {
+        margin: 20px 15px 10px 4%;
+    };
+}

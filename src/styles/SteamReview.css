@@ -1,0 +1,211 @@
+:root {
+  --text-color: white;
+  --text-font: Inter, sans-serif;
+  --text-size: 12px;
+}
+
+.review-page {
+  background-color: #212121;
+  padding: 24px 0;
+  @media only screen and (min-width: 1024px) {
+    display: flex;
+  };
+}
+
+.review-box {
+  flex: 2;
+  @media only screen and (min-width: 1024px) {
+    padding: 5px 20px;
+  };
+  @media only screen and (min-width: 768px) {
+    padding: 0 10%;
+  };
+  @media only screen and (min-width: 320px) {
+    padding: 0 5%;
+  };
+}
+
+.left-component {
+  flex: 1;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+}
+
+.right-component {
+  flex: 1;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
+
+.clickable-text {
+  color: var(--text-color);
+  cursor: pointer;
+  &:hover {
+    color: lightgrey;
+  }
+}
+
+.steam-name {
+  margin: 10px;
+  font-weight: normal;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.steam-image {
+  margin: 10px;
+  border-radius: 25px;
+  background-color: #5C5C5C;
+}
+
+.steam-dlc {
+  margin: 5px;
+  font-weight: normal;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.dlc-description {
+  margin: 5px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
+}
+
+.section-header {
+  margin: 10px 15px 5px 15px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.genre {
+  margin: 10px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
+}
+
+.review-description {
+  margin: 10px 15px 15px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
+}
+
+.player-count {
+  margin: 10px 15px 5px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
+}
+
+.score {
+  margin: 15px 0;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.overall-review {
+  margin: 15px 25px 15px auto;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.price-header {
+  margin: 10px 15px 0;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.release-header {
+  margin: 10px 25px 0 auto;
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+.price {
+  margin: 0 15px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
+}
+
+.mobile-text {
+  margin: 10px 15px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
+}
+
+.release-date {
+  margin: 0 25px 0 auto;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
+}
+
+.loading-bar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-container {
+  padding: 50px;
+}
+
+.loading-bar {
+  display: flex;
+  align-items: center;
+}
+
+.review-container {
+  display: flex;
+  align-items: center;
+}
+
+.review-summary {
+  margin: 0 auto 10px;
+  text-align: center;
+  font-size: 18px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
+}
+
+.summary {
+  margin: 5px 15px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: var(--text-size);
+  }
+}
+
+.disclaimer {
+  margin: 10px 15px;
+  font-size: 10px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  @media only screen and (max-width: 450px) {
+    font-size: 8px;
+  }
+}
