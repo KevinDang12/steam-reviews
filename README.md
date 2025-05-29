@@ -1,6 +1,5 @@
 # Steam Review Summarizer
-A Steam review summarizer that fetches reviews from Steam.
 
-The recent reviews are fed to the OpenAI to process and generate a summary of the reviews.
+A Steam Review Summarizer React web app that summarizes reviews for Steam games using the Steam API and OpenAI GPT-3.5 model
 
-The Steam review summarizer is hosted on Firebase. It can be accessed [here](https://steamreviewsummarizer.com/).
+The Steam Review Summarizer is viewable [here](https://steamreviewsummarizer.com/)
